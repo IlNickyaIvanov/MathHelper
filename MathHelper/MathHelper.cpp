@@ -60,22 +60,41 @@ void make(vector<vector<float>>& mx) {
 	while (line != "") {
 		vector<float> l;
 		string num;
-		for (int i = 0; i < line.size(); i++) {
-			if (line[i] == ' ')
+		for (int i = 0; i <= line.size(); i++) {
+			if ((line[i] == ' ' || i == line.size())) {
 				l.push_back(stof(num));
+				num = "";
+			}
+			else
+				num += line[i];
 		}
 		mx.push_back(l);
+	}
+}
+void make(vector<float> &mx) {
+	cout << "Input vector: \n";
+	string line;
+	getline(cin, line);
+	string num;
+	for (int i = 0; i <= line.size(); i++) {
+		if ((line[i] == ' ' || i == line.size() )) {
+			mx.push_back(stof(num));
+			num = "";
+		}
+		else
+			num += line[i];
 	}
 }
 
 void show(vector<vector<float>>& a) {
 	for (int i = 0; i < a.size(); i++) {
-		for (int j = 0; j < a[0].size(); j++)
-			cout << a[i][j] << '\t' << " ";
+		for (int j = 0; j < a[i].size(); j++)
+			cout << a[i][j]<<"\t" << " ";
 		cout << endl;
 	}
 }
 
+//умножение матриц
 bool mult(vector<vector<float>>& m1, vector<vector<float>>& m2, vector<vector<float>>& r) {
 	if (m1[0].size() != m2.size()) {
 		cout << "Incorrect size for mult \n";
@@ -93,7 +112,7 @@ bool mult(vector<vector<float>>& m1, vector<vector<float>>& m2, vector<vector<fl
 	}
 	return true;
 }
-
+//транспонирование матрицы
 void transpose(vector<vector<float>>& m, vector<vector<float>>& mt) {
 	for (int i = 0; i < m[0].size(); i++) {
 		vector<float> line;
@@ -103,7 +122,7 @@ void transpose(vector<vector<float>>& m, vector<vector<float>>& mt) {
 	}
 }
 
-
+//алгоритмическое дополнение по i j элементу
 void algAdition(vector<vector<float>>& a, int k, int m) {
 	for (int i = 0; i < a.size(); i++) {
 		if (i == k)
@@ -127,7 +146,7 @@ void copy(vector<vector<float>>& a, vector<vector<float>>& b) {
 		b.push_back(c);
 	}
 }
-
+// матрица из дополнений
 void attached(vector<vector<float>>& a, vector<vector<float>>& b) {
 	for (int i = 0; i < a.size(); i++) {
 		vector<float> c;
@@ -143,13 +162,13 @@ void attached(vector<vector<float>>& a, vector<vector<float>>& b) {
 	transpose(b, b2);
 	b = b2;
 }
-
+//обратная матрица
 void inverse(vector<vector<float>>& a, vector<vector<float>>& b) {
 	attached(a, b);
 	cout << 1.0 / (det(a)) << "determinant";
 	cout << endl;
 }
-
+//умножение матрицы на число
 void mult(vector<vector<float>>& a, float b) {
 	for (int i = 0; i < a.size(); i++) {
 		for (int j = 0; j < a[0].size(); j++) {
@@ -157,11 +176,13 @@ void mult(vector<vector<float>>& a, float b) {
 		}
 	}
 }
+//умножение vec на число
 void mult(vector<float>& a, float b) {
 	for (int i = 0; i < a.size(); i++) {
 		a[i] *= b;
 	}
 }
+//вычетание vec a-b i начало вычетания
 void substraction(vector<float>& b, vector<float>& a, int i) {
 	for (i; i < a.size(); i++) {
 		b[i] -= a[i];
@@ -200,40 +221,154 @@ void gauss(vector<vector<float>>& a, vector<float>& r) {
 	}
 	reverse(r.begin(), r.end());
 }
-
-float horner(vector<int>& a, int x) {
-	vector<int> b;
-	float ost;
+//a = (x - x)b + ost, где a принимает значение b
+float horner(vector<float> &a, float x) {
+	vector<float> b;
 	b.push_back(a[0]);
+	float ost = 0;
 	for (int i = 1; i < a.size() - 1; i++) {
-		b.push_back(a[i] - x * (a[i - 1]));
+		b.push_back(a[i] + x * (b[i-1]));
 	}
-	return a[a.size() - 1] - x * (a[a.size() - 1 - 1]);
+	ost = a[a.size() - 1] + x * (b[b.size()-1]);
+	if (a.size() == 1)
+		a = {};
+	else
+		a = b;
+	b.push_back(ost);
+	return ost;
 }
+//перевод десятичной дроби < 1 в обычную дробь a/b
+string convert(float num) {
+	float eps = 0.000000001;
+	int ch = 0;
+	int zn = 0;
+	int a = 1; int b = 1;
+	int mn = 2; // множитель для начального приближения
+	int iter = 0;
+	ch = a; zn = b;
+	// Поиск начального приближения
+	float c = 1;
+	do {
+		b++;
+		c = (double)a / b;
+	} while ((num - c) < 0);
+	if ((num - c) < eps)
+	{
+		ch = a; zn = b;
+		return to_string(a) + "/" + to_string(b);
+	}
+	b--;
+	c = (double)a / b;
+	if ((num - c) > -eps)
+	{
+		ch = a; zn = b;
+		return to_string(a) + "/" + to_string(b);
+	}
+	// Уточнение
+	while (iter < 20000)
+	{
+		int cc = a * mn, zz = b * mn;
+		iter++;
+		do {
+			zz++;
+			c = (double)cc / zz;
+		} while ((num - c) < 0);
+		if ((num - c) < eps)
+		{
+			ch = cc; zn = zz;
+			return to_string(a) + "/" + to_string(b);
+		}
+		zz--;
+		c = (double)cc / zz;
+		if ((num - c) > -eps)
+		{
+			ch = cc; zn = zz;
+			return to_string(a) + "/" + to_string(b);
+		}
+		mn++;
+	}
+	return to_string(a) + "/" +to_string(b);
+}
+
+//полином корень остатки в процессе деления процесс деления
+void allHorner(vector<float> &a,float b, vector <float>&osts,vector<vector<float>> &res) {
+	
+	while (a.size() > 0) {
+		res.push_back(a);
+		if (osts.size() > 0)
+			res[res.size() - 1].push_back(osts[osts.size() - 1]);
+		if(a.size()==1)
+			res.push_back(a);
+		osts.push_back(horner(a, b));		
+	}
+}
+
 void show(vector<float>& a) {
 	for (int i = 0; i < a.size(); i++) {
 		cout << a[i] << '\t' << " ";
 	}
+	cout << endl;
+}
+float stPDevision(vector<float> &a, vector<float> b) {
+	float quotient = a[0] / b[0];
+	mult(b,quotient);
+	substraction(a, b,0);
+	while (a.size() > 0 && a[0] == 0)
+		a.erase(a.begin()+0);
+	return quotient;
+}
+//делитель делимое результат остаток
+void pDevision( vector<float> a, vector<float> b, vector<float> &res, vector<float> &remainder) {
+	for (int i = 0; i <= a.size() - b.size(); i++) {
+		res.push_back(0);
+	}
+	while (a.size() >= b.size()) {
+		int c = (a.size() - b.size() + 1);
+		res[res.size() - c] = stPDevision(a, b);
+	}
+	if (a.size() > 0)
+		remainder = a;
+	else
+		remainder = { 0 };
+}
+void NOD(vector<float> a, vector<float> b, vector<vector<float>>&res, vector<float> &nod) {
+	vector<float>remainder1 = a;
+	vector<float>remainder2 = b;
+	while (remainder1.size() > 1 && remainder2.size() > 1) {
+		vector<float> r;
+		if (remainder1.size() >= remainder2.size()) {
+			pDevision(remainder1, remainder2, r, remainder1);
+		}
+		else {
+			pDevision(remainder2, remainder1, r, remainder2);
+		}
+		res.push_back(r);
+	}
+	if (remainder1.size() == 1)
+		nod = remainder2;
+	else
+		nod = remainder1;
 }
 int main()
 {
-	/*vector<vector<vector <float>>> matrices;
+	vector<vector<vector <float>>> matrices;
 	int n, m = 0;
 	int count = 0;
 	vector<vector<float>> it;
-
+	
 	vector<string> coms = { "add", "del","show *","allshow","mult * *","transpose *","inv *"};
 	cout << "Welcome! That is command list:\n";
 	for (int i = 0; i < coms.size(); i++) {
 		cout << coms[i] << endl;
 	}
+	
 	cout << "Write your command ";
 	while (true) {
 		string comand = "";
 		getline(cin, comand);
 		if (comand == "add") {
 			vector<vector <float>> matrix;
-			make(matrix, n, m);
+			make(matrix);
 			matrices.push_back(matrix);
 			cout << "Add sucses\n";
 		}
@@ -289,10 +424,27 @@ int main()
 			gauss(((n == -1) ? it : matrices[n]), r);
 			show(r);
 		}
+		else if(comand.substr(0, 6) == "horner"){
+			vector<float> osts;
+			vector<vector<float>> devision;
+			vector<float> polinom;
+			make(polinom);
+			float b; cout << "Input divider "; cin >> b; cout << endl;
+			allHorner(polinom, b, osts, devision); cout << endl;
+			cout << "Horner"; cout << endl;
+			show(devision);
+		}
+		else if (comand.substr(0, 3) == "nod") {
+			vector<float> a = { 1,1,0,5,-17,1,-12,-3,4 };
+			vector<float> b = { 1,0,0,4,-19,15,-18,11 };
+			vector<vector<float>> res;
+			vector<float> nod;
+			NOD(a, b, res, nod);
+			show(res);
+			show(nod);
+		}
 		else if (comand != "")
 			cout << "\nIncorrect command";
 	}
-	*/
-	vector<int>;
-	make();
+	
 }
