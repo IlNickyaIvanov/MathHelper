@@ -89,7 +89,7 @@ void make(vector<float> &mx) {
 void show(vector<vector<float>>& a) {
 	for (int i = 0; i < a.size(); i++) {
 		for (int j = 0; j < a[i].size(); j++)
-			cout << a[i][j]<<"\t" << " ";
+			cout << a[i][j]<< " ";
 		cout << endl;
 	}
 }
@@ -305,17 +305,33 @@ void allHorner(vector<float> &a,float b, vector <float>&osts,vector<vector<float
 
 void show(vector<float>& a) {
 	for (int i = 0; i < a.size(); i++) {
-		cout << a[i] << '\t' << " ";
+		cout << a[i] << " ";
 	}
 	cout << endl;
 }
-float stPDevision(vector<float> &a, vector<float> b) {
+float stPDevision(vector<float> &a, vector<float> &b) {
 	float quotient = a[0] / b[0];
 	mult(b,quotient);
 	substraction(a, b,0);
 	while (a.size() > 0 && a[0] == 0)
 		a.erase(a.begin()+0);
 	return quotient;
+}
+//делимое делитель процесс результат
+void pDevision(vector<float> a, vector<float> b, vector<vector<float>>& div, vector<float>& res) {
+	for (int i = 0; i <= a.size() - b.size(); i++) {
+		res.push_back(0);
+	}
+	while (a.size() >= b.size()) {
+		int c = (a.size() - b.size() + 1);
+		res[res.size() - c] = stPDevision(a, b);
+		div.push_back(b);
+		if (a.size() == 0)
+			div.push_back({ 0 });
+		else
+			div.push_back(a);
+		mult(b, 1 / res[res.size() - c]);
+	}
 }
 //делитель делимое результат остаток
 void pDevision( vector<float> a, vector<float> b, vector<float> &res, vector<float> &remainder) {
@@ -434,9 +450,20 @@ int main()
 			cout << "Horner"; cout << endl;
 			show(devision);
 		}
+		else if (comand.substr(0, 3) == "div") {
+			vector<float> a; make(a);
+			vector<float> b; make(b);
+			vector<vector<float>> div;
+			vector<float> res;
+			pDevision(a, b, div, res);
+			cout << "Res" << endl;
+			show(res);
+			cout << "Proc"<< endl;
+			show(div);
+		}
 		else if (comand.substr(0, 3) == "nod") {
-			vector<float> a = { 1,1,0,5,-17,1,-12,-3,4 };
-			vector<float> b = { 1,0,0,4,-19,15,-18,11 };
+			vector<float> a; make(a);
+			vector<float> b; make(b);
 			vector<vector<float>> res;
 			vector<float> nod;
 			NOD(a, b, res, nod);
